@@ -1,12 +1,16 @@
-﻿cls
 Write-Output "######################################################"
 Write-Output "Atribuição de Licenças Exchange/Teams O365 PowerShell"
 Write-Output "Autor: Izael Magalhaes - 07/08/2022"
 Write-Output "######################################################"
 Write-Output ""
+$ProgressPreference = "SilentlyContinue"
+#Install-Module MSOnline
+#Install-Module -Name AzureAD
+#Install-Module -Name ExchangeOnlineManagement
+#
 #Credenciais
 $username = 'email@ticorp.onmicrosoft.com'
-$pwd = ConvertTo-SecureString 'realpassword' -asplaintext -force;
+$pwd = ConvertTo-SecureString "password" -asplaintext -force;
 $cred = New-Object -TypeName PSCredential -argumentlist $username, $pwd
 #
 #
@@ -20,20 +24,20 @@ try{
     Write-Output "[OK] MsolService Conectou"
 }
 catch{
-    Write-Output "[Erro] MsolService Nao Conectou"
+    Write-Output $_Exception.Message
 }
 #----x--------
-Write-Output " "
-Write-Output "-> Conectando ao Azuread"
-Write-Output " "
+#Write-Output " "
+#Write-Output "-> Conectando ao Azuread"
+#Write-Output " "
 #Conectar ao Azuread
-try{
-    Connect-azuread -Credential $cred
-    Write-Output "[OK] Azuread Conectou"
-}
-catch{
-    Write-Output "[NOK] Azuread Nao Conectou"
-}
+#try{
+#    Connect-azuread -Credential $cred
+#    Write-Output "[OK] Azuread Conectou"
+#}
+#catch{
+#    Write-Output "[NOK] Azuread Nao Conectou"
+#}
 #----x--------
 Write-Output " "
 Write-Output "-> Conectando ao ExchangeOnline"
@@ -44,14 +48,14 @@ try{
     Write-Output "[OK] ExchangeOnline Conectou"
 }
 catch{
-    Write-Output "[NOK] ExchangeOnline Nao Conectou"
+    Write-Output $_Exception.Message
 }
 #----x--------
 #
 Write-Output " "
-#Report 
-$url_report = "C:\temp\report.csv"
-$url_licences = "C:\temp\licences.csv"
+#Report Users Knowbe4
+$url_report = "report.csv"
+$url_licences = "licences.csv"
 #
 Write-Output "Importanto Arquivos"
 $file_report = Import-Csv $url_report
@@ -112,7 +116,7 @@ foreach($line_report in $file_report)
 
                 #Desbloqueio Email O365
                  try{
-                    #Set-CASMailbox $email_report -OWAEnabled $true -PopEnabled $true -SmtpClientAuthenticationDisabled $false -OutlookMobileEnabled $true;
+                    Set-CASMailbox $email_report -OWAEnabled $true -PopEnabled $true -SmtpClientAuthenticationDisabled $false -OutlookMobileEnabled $true;
                     Write-Output "[OK] Email"
                     }
                 catch{
@@ -122,8 +126,8 @@ foreach($line_report in $file_report)
                 #Desbloqueio Teams
                 if($o365_licence -ne "null"){
                     try{
-                        #$LE = New-MsolLicenseOptions -AccountSkuId "reseller-account:"$o365_licence
-                        #Set-MsolUserLicense -UserPrincipalName $email_report -LicenseOptions $LE
+                        $LE = New-MsolLicenseOptions -AccountSkuId "reseller-account:"$o365_licence
+                        Set-MsolUserLicense -UserPrincipalName $email_report -LicenseOptions $LE
                         Write-Output "[OK] Teams"
                     }catch{
                         Write-Output "[NOK] Teams"
